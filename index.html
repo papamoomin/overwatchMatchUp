@@ -36,19 +36,19 @@ table{width:100%;border-collapse:collapse}th,td{padding:5px 6px;border-bottom:1p
 </head>
 <body>
 <h1>오버워치 상성 표</h1>
-<div class="card"><h2>필터</h2><h3>맵 종류</h3><div id="modeF" class="seg"></div><h3>영웅 역할</h3><div id="roleF" class="seg"></div></div>
 <div class="card"><h2>단일 영웅 1:1 상성</h2><select id="one"></select><div id="oneOut"></div></div>
-<div class="card"><h2>팀 조합 선택 (아군·적군 각 최대 5명)</h2>
-<div id="side" class="seg"></div><div id="pool" class="pool"></div><div id="note" class="mu"></div>
-<div class="teams"><div id="ally"></div><div id="enemy"></div></div></div>
-<div class="card"><h2>조합 순위</h2><div id="combo"></div>
+<div class="card"><h2>팀 조합 선택 (아군·적군 각 최대 5명)</h2><br/>
+<h3>영웅 역할</h3><div id="roleF" class="seg"></div>
+<div id="side" class="seg"></div><div id="pool" class="pool"></div><div id="note" class="mu"></div><br/>
+<div class="teams"><div id="ally"></div><div id="enemy"></div></div>
+<br/><br/><h2>조합 순위</h2><div id="combo"></div><br/>
 <h5>다이브는 러쉬에 약하고 포킹에 강하다</h5>
 <h5>러쉬는 포킹, 앵커에 약하고 다이브에 강하다</h5>
 <h5>포킹은 다이브에 약하고 러쉬, 앵커에 강하다</h5>
 <h5>앵커는 포킹에 약하고 러쉬에 강하다</h5>
-</div>
+</div></div>
 
-<div class="card"><h2>맵 선택</h2><div id="maps" class="pool"></div></div>
+<div class="card"><h2>맵 선택</h2><h3>맵 종류</h3><div id="modeF" class="seg"></div><br/><div id="maps" class="pool"></div></div>
 <div class="card"><h2 id="mapT">맵별 영웅 승률</h2><div id="mapOut"></div></div>
 <div id="tip"></div>
 
@@ -77,6 +77,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:5px 6px;border-bottom:1p
 {"name":"벤처","role":"딜러","combos":{"포킹":0,"러쉬":1,"다이브":0.5,"앵커":0}},
 {"name":"소전","role":"딜러","combos":{"포킹":0.5,"러쉬":0.5,"다이브":0.5,"앵커":0}},
 {"name":"솔저: 76","role":"딜러","combos":{"포킹":1,"러쉬":0.5,"다이브":0,"앵커":0.5}},
+{"name":"솜브라","role":"딜러","combos":{"포킹":0,"러쉬":0,"다이브":1,"앵커":0}},
 {"name":"시메트라","role":"딜러","combos":{"포킹":0.5,"러쉬":1,"다이브":0,"앵커":1}},
 {"name":"시에라","role":"딜러","combos":{"포킹":1,"러쉬":0,"다이브":0,"앵커":0}},
 {"name":"시온","role":"딜러","combos":{"포킹":0.5,"러쉬":1,"다이브":0.5,"앵커":0}},
@@ -99,7 +100,6 @@ table{width:100%;border-collapse:collapse}th,td{padding:5px 6px;border-bottom:1p
 {"name":"미즈키","role":"힐러","combos":{"포킹":0,"러쉬":1,"다이브":1,"앵커":0}},
 {"name":"바티스트","role":"힐러","combos":{"포킹":1,"러쉬":0.5,"다이브":0,"앵커":0.5}},
 {"name":"브리기테","role":"힐러","combos":{"포킹":0,"러쉬":0.5,"다이브":1,"앵커":0}},
-{"name":"솜브라","role":"힐러","combos":{"포킹":0,"러쉬":0,"다이브":1,"앵커":0}},
 {"name":"아나","role":"힐러","combos":{"포킹":0.5,"러쉬":0,"다이브":1,"앵커":1}},
 {"name":"우양","role":"힐러","combos":{"포킹":1,"러쉬":1,"다이브":0,"앵커":0.5}},
 {"name":"일리아리","role":"힐러","combos":{"포킹":1,"러쉬":0,"다이브":0,"앵커":1}},
