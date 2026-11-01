@@ -31,15 +31,16 @@ table{width:100%;border-collapse:collapse}th,td{padding:5px 6px;border-bottom:1p
 .t3{background:#f0a0a0;color:#4a1010}.t4{background:#b03030;color:#fff}.t5{background:transparent;color:var(--fg);border:1px dashed var(--ln)}
 .badge{font-size:.7rem;padding:0 5px;border-radius:4px;color:#fff;margin-left:4px}.badge.a{background:var(--a)}.badge.e{background:var(--e)}
 #tip{position:fixed;display:none;max-width:260px;padding:6px 9px;border-radius:6px;background:#111;color:#fff;font-size:.82rem;z-index:9;pointer-events:none}
+.pool .role-divider{flex-basis:100%;height:1px;background:var(--ln);margin:4px 0}
 @media(max-width:640px){.teams{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <h1>오버워치 상성 표</h1>
 <div class="card"><h2>단일 영웅 1:1 상성</h2><select id="one"></select><div id="oneOut"></div></div>
-<div class="card"><h2>팀 조합 선택 (아군·적군 각 최대 5명)</h2><br/>
-<h3>영웅 역할</h3><div id="roleF" class="seg"></div>
-<div id="side" class="seg"></div><div id="pool" class="pool"></div><div id="note" class="mu"></div><br/>
+<div class="card"><h2>팀 조합 선택 (아군·적군 각 최대 6명)</h2><br/>
+<h3>영웅 역할</h3><div id="roleF" class="seg"></div><br/>
+<div id="side" class="seg"></div><br/><div id="pool" class="pool"></div><div id="note" class="mu"></div><br/>
 <div class="teams"><div id="ally"></div><div id="enemy"></div></div>
 <br/><br/><h2>조합 순위</h2><div id="combo"></div><br/>
 <h5>다이브는 러쉬에 약하고 포킹에 강하다</h5>
@@ -49,11 +50,12 @@ table{width:100%;border-collapse:collapse}th,td{padding:5px 6px;border-bottom:1p
 </div></div>
 
 <div class="card"><h2>맵 선택</h2><h3>맵 종류</h3><div id="modeF" class="seg"></div><br/><div id="maps" class="pool"></div></div>
-<div class="card"><h2 id="mapT">맵별 영웅 승률</h2><div id="mapOut"></div></div>
+<div class="card"><h2 id="mapT">맵별 영웅 승률</h2><select id="sortSel"><option value="wr">승률순</option><option value="pick">픽률순</option><option value="name">가나다순</option></select><div id="mapOut"></div></div>
 <div id="tip"></div>
 
 <!-- 아래 샘플 JSON을 본인 데이터로 교체하세요. data_encoder.html에서 만든 "b64:..." 문자열도 그대로 넣을 수 있습니다. 샘플 수치는 가상입니다. -->
 <script type="application/json" id="preload">
+
 {"heroes":[
 {"name":"도미나","role":"탱커","combos":{"포킹":1,"러쉬":0,"다이브":0,"앵커":0.5}},
 {"name":"둠피스트","role":"탱커","combos":{"포킹":0,"러쉬":0,"다이브":1,"앵커":0}},
@@ -13090,36 +13092,38 @@ try{let t=$('preload').textContent.trim();if(t.startsWith('b64:'))t=new TextDeco
 const H=D.heroes||[],M=D.maps||[],ST=D.mapStats||[],hero=new Map(H.map(h=>[h.name,h])),MU=new Map();
 (D.matchups||[]).forEach(m=>{const l=norm(m.level);if(LV.includes(l))MU.set(m.a+'|'+m.b,{l,why:m.why||''})});
 const mu=(a,b)=>{let x=MU.get(a+'|'+b);if(x)return x;x=MU.get(b+'|'+a);return x&&{l:MIR[x.l],why:x.why}};
-let mode='',role='',map='',side='a',one='',note='';const T={a:[],e:[]},tip=$('tip');
+let mode='',role='',map='',side='a',one='',note='',sortBy='wr';const T={a:[],e:[]},tip=$('tip');
 const seg=(k,it,cur)=>['전체',...it].map(v=>{const x=v==='전체'?'':v;return `<button data-k="${k}" data-v="${x}" class="${cur===x?'on':''}">${v}</button>`}).join('');
 const sum=l=>l.reduce((s,[,w])=>s+w,0),cb=x=>Array.isArray(x)?Object.fromEntries(x.map(g=>[g,1])):(x||{});
 const rank=t=>{const c={};t.forEach(n=>Object.entries(cb(hero.get(n).combos)).forEach(([g,w])=>{if(w>0)(c[g]=c[g]||[]).push([n,+w])}));
 const a=Object.entries(c).sort((x,y)=>sum(y[1])-sum(x[1])||x[0].localeCompare(y[0],'ko'));let r=0;
-return a.length?`<table><tr><th>순위</th><th>조합</th><th>점수</th><th>영웅</th></tr>${a.map(([g,l],i)=>{if(!i||sum(l)!==sum(a[i-1][1]))r=i+1;return `<tr><td>${r}</td><td>${esc(g)}</td><td>${sum(l)}/5</td><td class="mu">${esc(l.map(([n,w])=>w<1?n+'('+w+')':n).join(', '))}</td></tr>`}).join('')}</table>`:'<span class="mu">일치하는 조합 태그가 없습니다.</span>'};
+return a.length?`<table><tr><th>순위</th><th>조합</th><th>점수</th><th>영웅</th></tr>${a.map(([g,l],i)=>{if(!i||sum(l)!==sum(a[i-1][1]))r=i+1;return `<tr><td>${r}</td><td>${esc(g)}</td><td>${+sum(l).toFixed(2)}/${t.length}</td><td class="mu">${esc(l.map(([n,w])=>w<1?n+'('+w+')':n).join(', '))}</td></tr>`}).join('')}</table>`:'<span class="mu">일치하는 조합 태그가 없습니다.</span>'};
 function R(){
 tip.style.display='none';
 const cm=M.find(m=>m.name===map);if(map&&mode&&(!cm||cm.mode!==mode))map='';
 $('modeF').innerHTML=seg('mode',MODES,mode);$('roleF').innerHTML=seg('role',ROLES,role);
 $('maps').innerHTML=M.filter(m=>!mode||m.mode===mode).map(m=>`<button class="${map===m.name?'on':''}" data-k="map" data-v="${esc(m.name)}">${esc(m.name)}<small>${esc(m.mode)}</small></button>`).join('')||'<span class="mu">맵이 없습니다.</span>';
 $('side').innerHTML=[['a','아군 선택'],['e','적군 선택']].map(([v,t])=>`<button data-k="side" data-v="${v}" class="${side===v?'on':''}">${t}</button>`).join('')+'<button data-k="reset">초기화</button>';
-$('pool').innerHTML=H.filter(h=>!role||h.role===role).map(h=>`<button class="hb ${T.a.includes(h.name)?'a':''} ${T.e.includes(h.name)?'e':''}" data-k="h" data-v="${esc(h.name)}">${esc(h.name)}<small>${esc(h.role)}</small></button>`).join('');
+const hb=h=>`<button class="hb ${T.a.includes(h.name)?'a':''} ${T.e.includes(h.name)?'e':''}" data-k="h" data-v="${esc(h.name)}">${esc(h.name)}<small>${esc(h.role)}</small></button>`;
+$('pool').innerHTML=ROLES.filter(rl=>!role||rl===role).map(rl=>H.filter(h=>h.role===rl).map(hb).join('')).filter(Boolean).join('<div class="role-divider"></div>');
 $('note').textContent=note;
-[['a','아군','ally'],['e','적군','enemy']].forEach(([s,t,id])=>$(id).innerHTML=`<h3>${t} ${T[s].length}/5</h3>`+(T[s].map(n=>`<span class="chip ${s}"><b data-k="f" data-v="${esc(n)}">${esc(n)}</b><button data-k="x" data-v="${s}|${esc(n)}">×</button></span>`).join('')||'<span class="mu">선택 없음</span>'));
+[['a','아군','ally'],['e','적군','enemy']].forEach(([s,t,id])=>$(id).innerHTML=`<h3>${t} ${T[s].length}/6</h3>`+(T[s].map(n=>`<span class="chip ${s}"><b data-k="f" data-v="${esc(n)}">${esc(n)}</b><button data-k="x" data-v="${s}|${esc(n)}">×</button></span>`).join('')||'<span class="mu">선택 없음</span>'));
 $('mapT').textContent=map?`${map} 영웅별 승률`:'맵별 영웅 승률';
-const rs=ST.filter(r=>r.map===map&&hero.has(r.hero)&&(!role||hero.get(r.hero).role===role)).sort((x,y)=>y.wr-x.wr);
+const SORT={wr:(x,y)=>y.wr-x.wr,pick:(x,y)=>(y.pick??-1)-(x.pick??-1),name:(x,y)=>x.hero.localeCompare(y.hero,'ko')};
+const rs=ST.filter(r=>r.map===map&&hero.has(r.hero)&&(!role||hero.get(r.hero).role===role)).sort(SORT[sortBy]);
 $('mapOut').innerHTML=!map?'<span class="mu">위에서 맵을 선택하세요.</span>':rs.length?`<table><tr><th>영웅</th><th>승률</th><th></th><th>픽률+밴률</th></tr>${rs.map(r=>`<tr><td>${esc(r.hero)}${T.a.includes(r.hero)?'<span class="badge a">아군</span>':''}${T.e.includes(r.hero)?'<span class="badge e">적군</span>':''}</td><td>${(+r.wr).toFixed(1)}%</td><td><div class="bar"><i style="width:${Math.max(0,Math.min(100,r.wr))}%"></i></div></td><td>${r.pick==null?'-':(+r.pick).toFixed(1)+'%'}</td></tr>`).join('')}</table>`:'<span class="mu">이 맵의 통계가 없습니다.</span>';
 $('one').innerHTML='<option value="">영웅 선택</option>'+H.map(h=>`<option value="${esc(h.name)}"${h.name===one?' selected':''}>${esc(h.name)}</option>`).join('');
 if(!one)$('oneOut').innerHTML='<span class="mu">영웅을 고르세요. 선택한 영웅 칩의 이름을 눌러도 됩니다.</span>';
 else{const g=[[],[],[],[],[],[]];
 H.filter(h=>h.name!==one&&(!role||h.role===role)).forEach(h=>{const m=mu(one,h.name);g[m?LV.indexOf(m.l):5].push([h.name,m?m.why:''])});
 $('oneOut').innerHTML=`<p class="mu">${esc(one)}이(가) 상대 영웅을 만났을 때 (마우스를 올리면 설명이 보입니다)</p>`+g.map((a,i)=>a.length?`<div class="grp"><span class="tier t${i}">${LN[i]}</span>${a.map(([n,w])=>`<span class="pill t${i}" tabindex="0" data-tip="${esc(w||(i===5?'상성 정보가 없습니다.':'설명이 없습니다.'))}">${esc(n)}</span>`).join('')}</div>`:'').join('')}
-$('combo').innerHTML=`<div class="teams">${[['a','아군'],['e','적군']].map(([s,t])=>`<div><h3>${t} 조합 순위 (${T[s].length}/5)</h3>${T[s].length===5?rank(T[s]):'<span class="mu">5명을 선택하면 순위가 표시됩니다.</span>'}</div>`).join('')}</div>`;
+$('combo').innerHTML=`<div class="teams">${[['a','아군'],['e','적군']].map(([s,t])=>`<div><h3>${t} 조합 순위 (${T[s].length}/6)</h3>${T[s].length?rank(T[s]):'<span class="mu">영웅을 선택하면 순위가 표시됩니다.</span>'}</div>`).join('')}</div>`;
 }
 document.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k,v=b.dataset.v;note='';
 if(k==='mode')mode=v;else if(k==='role')role=v;else if(k==='map')map=map===v?'':v;else if(k==='side')side=v;else if(k==='f')one=v;
 else if(k==='x'){const[s,n]=v.split('|');T[s]=T[s].filter(x=>x!==n)}
 else if(k==='reset'){T.a=[];T.e=[];map='';one=''}
-else if(k==='h'){const t=T[side],i=t.indexOf(v);if(i>=0)t.splice(i,1);else if(t.length<5)t.push(v);else note=(side==='a'?'아군':'적군')+'은 최대 5명까지 선택할 수 있습니다.'}
+else if(k==='h'){const t=T[side],i=t.indexOf(v);if(i>=0)t.splice(i,1);else if(t.length<6)t.push(v);else note=(side==='a'?'아군':'적군')+'은 최대 6명까지 선택할 수 있습니다.'}
 R()});
 const sh=e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(!t){tip.style.display='none';return}
 tip.textContent=t.dataset.tip;tip.style.display='block';const r=t.getBoundingClientRect();
@@ -13127,6 +13131,7 @@ tip.style.left=Math.max(4,Math.min(r.left,innerWidth-tip.offsetWidth-4))+'px';ti
 ['mouseover','focusin'].forEach(n=>document.addEventListener(n,sh));
 addEventListener('scroll',()=>tip.style.display='none',true);
 $('one').onchange=e=>{one=e.target.value;R()};
+$('sortSel').onchange=e=>{sortBy=e.target.value;R()};
 R();
 })();
 </script>
